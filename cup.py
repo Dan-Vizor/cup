@@ -58,7 +58,7 @@ SETTINGS = ReadJSON("settings.json")
 # getting LoopCount value from user
 UserArgs = sys.argv[1:]
 if "-v" in UserArgs or "-V" in UserArgs:
-	print(__version__)
+	print("version: " + str(__version__))
 	exit()
 
 if UserArgs != []:
