@@ -49,7 +49,6 @@ def ReadJSON(File):
 # OS detection
 OS = sys.platform
 OS = OS.lower()
-OS = "windows"
 print("Running in {} mode".format(OS))
 if OS == "darwin": error("Every day we stray further from God.") # ugh Apple
 
