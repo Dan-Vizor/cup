@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 __version__ = 0.9
 
-import time, sys, json
+import time, sys, json, sys
 import pyautogui
 
 def error(ErrorMessage):
@@ -46,15 +46,29 @@ def ReadJSON(File):
 	except IOError:
 		error("unable to locate file ({})".format(File))
 
+# OS detection
+OS = sys.platform
+OS = OS.lower()
+OS = "windows"
+print("Running in {} mode".format(OS))
+if OS == "darwin": error("Every day we stray further from God.") # ugh Apple
+
 # main program start
 SETTINGS = ReadJSON("settings.json")
 
 # getting LoopCount value from user
 UserArgs = sys.argv[1:]
+if "-v" in UserArgs or "-V" in UserArgs:
+	print(__version__)
+	exit()
+
 if UserArgs != []:
 	try:
 		LoopCount = int(UserArgs[0])
 	except:
+		error("invalid input")
+
+	if LoopCount <= 0:
 		error("invalid value")
 
 else:
@@ -72,26 +86,32 @@ if not INF:
 
 # startup countdown
 i = SETTINGS["countdown-value"]
+if OS == "windows": print("starting in {}s".format(i))
 while i > -1:
-	print(" "*100, end="\r")
-	print("starting in {}s".format(i), end="\r")
+	if OS == "linux":
+		print(" "*100, end="\r")
+		print("starting in {}s".format(i), end="\r")
 	time.sleep(1)
 	i -= 1
-print("\n")
+if OS == "linux": print("\n")
 
 # printing "cup"
 i = 1
 while True:
-	print(" "*100, end="\r")
-	if not INF:
-		PrintProgressBar(i, LoopCount, prefix = "Progress:", length = 50)
-	else:
-		print(" {} cups".format(i), end="\r")
+	if OS == "linux":
+		print(" "*100, end="\r")
+		if not INF:
+			PrintProgressBar(i, LoopCount, prefix = "Progress:", length = 50)
+		else:
+			print(" {} cups".format(i), end="\r")
+
+	else: print(i)
 
 	try:
 		pyautogui.press('backspace', presses = len(SETTINGS["print-text"]))
 		pyautogui.write(SETTINGS["print-text"])
 		pyautogui.press('enter')
+
 	except:
 		error("exiting due to pyautogui failsafe")
 
