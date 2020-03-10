@@ -2,5 +2,6 @@
 "countdown-value": 5,
 "buffer-time": 2,
 "interval": 5,
+"do-backspace": true,
 "print-text": "cup"
 }

@@ -1,15 +1,17 @@
 #!/usr/bin/python3
-__version__ = 0.9
-
-import time, sys, json, sys
+import time, sys, json, sys, urllib3
 import pyautogui
+
+# get version number
+try: __version__ = open("version.txt", "r").read().rstrip()
+except: print("Warning: unable to locate version info")
 
 def error(ErrorMessage):
 	print("\nError: " + ErrorMessage)
 	raise SystemExit
 
 def StoSMH(seconds):
-	m, s = divmod(LoopCount * seconds, 60)
+	m, s = divmod(int(seconds), 60)
 	h, m = divmod(m, 60)
 	if s < 10: s = "0" + str(s)
 	if m < 10: m = "0" + str(m)
@@ -46,76 +48,92 @@ def ReadJSON(File):
 	except IOError:
 		error("unable to locate file ({})".format(File))
 
-# OS detection
-OS = sys.platform
-OS = OS.lower()
-print("Running in {} mode".format(OS))
-if OS == "darwin": error("Every day we stray further from God.") # ugh Apple
+def main():
+	UserArgs = sys.argv[1:]
+	if "-v" in UserArgs or "-V" in UserArgs:
+		print("version: " + str(__version__))
+		exit()
 
-# main program start
-SETTINGS = ReadJSON("settings.json")
+	# checking for new versions
+	http = urllib3.PoolManager()
+	RemoteVersionNo = http.request('GET', "")
 
-# getting LoopCount value from user
-UserArgs = sys.argv[1:]
-if "-v" in UserArgs or "-V" in UserArgs:
-	print("version: " + str(__version__))
-	exit()
+	# OS detection
+	OS = sys.platform
+	OS = OS.lower()
+	print("Running in {} mode".format(OS))
+	if OS == "darwin": error("Every day we stray further from God.") # ugh Apple
 
-if UserArgs != []:
-	try:
-		LoopCount = int(UserArgs[0])
-	except:
-		error("invalid input")
+	# main program start
+	SETTINGS = ReadJSON("settings.json")
 
+	# getting LoopCount value from user
+	if UserArgs != []:
+		try:
+			LoopCount = int(UserArgs[0])
+		except:
+			error("invalid input")
+
+		if LoopCount <= 0:
+			error("invalid value")
+
+	else:
+		LoopCount = 0
+
+	#setting INF mode
+	INF = False
 	if LoopCount <= 0:
-		error("invalid value")
+		INF = True
+		LoopCount = 2
 
-else:
-	LoopCount = 0
-
-#setting INF mode
-INF = False
-if LoopCount <= 0:
-	INF = True
-	LoopCount = 2
-
-# working out how long it will take to do
-if not INF:
-	print("ETA: {}".format(StoSMH(round(SETTINGS["interval"] + SETTINGS["buffer-time"]))))
-
-# startup countdown
-i = SETTINGS["countdown-value"]
-if OS == "windows": print("starting in {}s".format(i))
-while i > -1:
-	if OS == "linux":
-		print(" "*100, end="\r")
-		print("starting in {}s".format(i), end="\r")
-	time.sleep(1)
-	i -= 1
-if OS == "linux": print("\n")
-
-# printing "cup"
-i = 1
-while True:
-	if OS == "linux":
-		print(" "*100, end="\r")
-		if not INF:
-			PrintProgressBar(i, LoopCount, prefix = "Progress:", length = 50)
-		else:
-			print(" {} cups".format(i), end="\r")
-
-	else: print(i)
-
-	try:
-		pyautogui.press('backspace', presses = len(SETTINGS["print-text"]))
-		pyautogui.write(SETTINGS["print-text"])
-		pyautogui.press('enter')
-
-	except:
-		error("exiting due to pyautogui failsafe")
-
+	# working out how long it will take to do
 	if not INF:
-		if i >= LoopCount: break
+		print("ETA: {}".format(StoSMH((SETTINGS["interval"] + SETTINGS["buffer-time"]) * LoopCount)))
 
-	i += 1
-	time.sleep(SETTINGS["interval"] + SETTINGS["buffer-time"])
+	# startup countdown
+	i = SETTINGS["countdown-value"]
+	if OS == "windows": print("starting in {}s".format(i))
+	while i > -1:
+		if OS == "linux":
+			print(" "*100, end="\r")
+			print("starting in {}s".format(StoSMH(i)), end="\r")
+		time.sleep(1)
+		i -= 1
+	if OS == "linux": print("\n")
+
+	# printing "cup"
+	i = 1
+	StartTime = time.time()
+	while True:
+		try:
+			if SETTINGS["do-backspace"]: pyautogui.press('backspace', presses = len(SETTINGS["print-text"]))
+			pyautogui.write(SETTINGS["print-text"])
+			pyautogui.press('enter')
+
+		except: error("exiting due to pyautogui failsafe")
+
+		# Linux user feedback
+		if OS == "linux":
+			if not INF:
+				PrintProgressBar(i, LoopCount, prefix = "Progress:", length = 50)
+				time.sleep(SETTINGS["interval"] + SETTINGS["buffer-time"])
+			else:
+				for WaitCounter in range(SETTINGS["interval"] + SETTINGS["buffer-time"]):
+					timer = StoSMH(round((time.time() - StartTime), 2))
+					print(" "*100, end = "\r")
+					print("  {} cup(s)  {}".format(i, timer), end = "\r")
+					time.sleep(1)
+
+		if not INF:
+			if i >= LoopCount: break
+
+		# Windows user feedback
+		if OS == "windows":
+			print(i)
+			time.sleep(SETTINGS["interval"] + SETTINGS["buffer-time"])
+		i += 1
+
+try:
+	main()
+except KeyboardInterrupt:
+	print("\n program terminated by keyboard interrupt")
