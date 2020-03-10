@@ -1,10 +1,10 @@
 #!/usr/bin/python3
-import time, sys, json, sys, urllib3
+import time, sys, json, sys, urllib.request
 import pyautogui
 
 # get version number
 try: __version__ = open("version.txt", "r").read().rstrip()
-except: print("Warning: unable to locate version info")
+except: print("Warning: unable to get local version info (no version file found)")
 
 def error(ErrorMessage):
 	print("\nError: " + ErrorMessage)
@@ -55,8 +55,15 @@ def main():
 		exit()
 
 	# checking for new versions
-	http = urllib3.PoolManager()
-	RemoteVersionNo = http.request('GET', "")
+	try:
+		response = urllib.request.urlopen("https://raw.githubusercontent.com/Dan-Vizor/cup/master/version.txt")
+	except:
+		print("Warning: unable to get remote version info (check internet connection)")
+	lines = response.readlines()
+	RemoteVersion = lines[0].decode("utf-8").rstrip()
+
+	if RemoteVersion != __version__:
+		print("Warning: Version {} is avalable, you are currently running version {}.\nPlease consider upgrading.".format(RemoteVersion, __version__))
 
 	# OS detection
 	OS = sys.platform
