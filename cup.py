@@ -94,7 +94,8 @@ def main():
 
 	# working out how long it will take to do
 	if not INF:
-		print("ETA: {}".format(StoSMH((SETTINGS["interval"] + SETTINGS["buffer-time"]) * LoopCount)))
+		t = SETTINGS["interval"] + SETTINGS["buffer-time"]
+		print("ETA: {}".format(StoSMH((t * LoopCount) - t -1)))
 
 	# startup countdown
 	i = SETTINGS["countdown-value"]
@@ -118,20 +119,22 @@ def main():
 
 		except: error("exiting due to pyautogui failsafe")
 
+		if not INF:
+			if i >= LoopCount:
+				PrintProgressBar(i, LoopCount, prefix = "Progress:", suffix = timer, length = 50)
+				break
+
 		# Linux user feedback
 		if OS == "linux":
-			if not INF:
-				PrintProgressBar(i, LoopCount, prefix = "Progress:", length = 50)
-				time.sleep(SETTINGS["interval"] + SETTINGS["buffer-time"])
-			else:
-				for WaitCounter in range(SETTINGS["interval"] + SETTINGS["buffer-time"]):
-					timer = StoSMH(round((time.time() - StartTime), 2))
+			for WaitCounter in range(SETTINGS["interval"] + SETTINGS["buffer-time"]):
+				timer = StoSMH(round((time.time() - StartTime), 2))
+				if not INF:
+					PrintProgressBar(i, LoopCount, prefix = "Progress:", suffix = timer, length = 50)
+					#time.sleep(SETTINGS["interval"] + SETTINGS["buffer-time"])
+				else:
 					print(" "*100, end = "\r")
 					print("  {} cup(s)  {}".format(i, timer), end = "\r")
-					time.sleep(1)
-
-		if not INF:
-			if i >= LoopCount: break
+				time.sleep(1)
 
 		# Windows user feedback
 		if OS == "windows":
