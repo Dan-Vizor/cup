@@ -92,10 +92,12 @@ def main():
 		INF = True
 		LoopCount = 2
 
-	# working out how long it will take to do
+	# working out ETAs
+	t = SETTINGS["interval"] + SETTINGS["buffer-time"]
 	if not INF:
-		t = SETTINGS["interval"] + SETTINGS["buffer-time"]
 		print("ETA: {}".format(StoSMH((t * LoopCount) - t -1)))
+	else:
+		print("{} CpM".format(round(60 / t, 2)))
 
 	# startup countdown
 	i = SETTINGS["countdown-value"]
@@ -130,10 +132,9 @@ def main():
 				timer = StoSMH(round((time.time() - StartTime), 2))
 				if not INF:
 					PrintProgressBar(i, LoopCount, prefix = "Progress:", suffix = timer, length = 50)
-					#time.sleep(SETTINGS["interval"] + SETTINGS["buffer-time"])
 				else:
 					print(" "*100, end = "\r")
-					print("  {} cup(s)  {}".format(i, timer), end = "\r")
+					print("  {} cup(s) | {}".format(i, timer), end = "\r")
 				time.sleep(1)
 
 		# Windows user feedback
