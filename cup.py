@@ -98,11 +98,11 @@ def main():
 
 	# startup countdown
 	i = SETTINGS["countdown-value"]
-	if OS == "windows": print("starting in {}".format(i))
+	if OS == "windows": print("starting in {}s".format(i))
 	while i > -1:
 		if OS == "linux":
 			print(" "*100, end="\r")
-			print("starting in {}s".format(StoSMH(i)), end="\r")
+			print("starting in {}".format(StoSMH(i)), end="\r")
 		time.sleep(1)
 		i -= 1
 	if OS == "linux": print("\n")
