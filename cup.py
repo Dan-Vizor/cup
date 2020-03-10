@@ -71,7 +71,6 @@ def main():
 	print("Running in {} mode".format(OS))
 	if OS == "darwin": error("Every day we stray further from God.") # ugh Apple
 
-	# main program start
 	SETTINGS = ReadJSON("settings.json")
 
 	# getting LoopCount value from user
@@ -99,7 +98,7 @@ def main():
 
 	# startup countdown
 	i = SETTINGS["countdown-value"]
-	if OS == "windows": print("starting in {}s".format(i))
+	if OS == "windows": print("starting in {}".format(i))
 	while i > -1:
 		if OS == "linux":
 			print(" "*100, end="\r")
