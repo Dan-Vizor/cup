@@ -123,7 +123,7 @@ def main():
 
 		if not INF:
 			if i >= LoopCount:
-				PrintProgressBar(i, LoopCount, prefix = "Progress:", suffix = timer, length = 50)
+				PrintProgressBar(i, LoopCount, prefix = "  {}".format(i), suffix = timer, length = 50)
 				break
 
 		# Linux user feedback
@@ -131,7 +131,7 @@ def main():
 			for WaitCounter in range(SETTINGS["interval"] + SETTINGS["buffer-time"]):
 				timer = StoSMH(round((time.time() - StartTime), 2))
 				if not INF:
-					PrintProgressBar(i, LoopCount, prefix = "Progress:", suffix = timer, length = 50)
+					PrintProgressBar(i, LoopCount, prefix = "  {}".format(i), suffix = timer, length = 50)
 				else:
 					print(" "*100, end = "\r")
 					print("  {} cup(s) | {}".format(i, timer), end = "\r")
